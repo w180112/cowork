@@ -1,0 +1,85 @@
+---
+name: init
+description: 初始化 cowork task-loop 工作流——問答收集專案參數(主分支、
+  commit gates、implementer、核准政策、語言),生成 .claude/cowork.md
+  設定檔與 WORKFLOW.md,implementer 選 codex 時把協定段落合併進
+  AGENTS.md,最後跑環境檢查。當使用者說「cowork init」「初始化
+  task-loop」或首次在專案使用 cowork 時觸發。
+---
+
+本 skill 目錄下的 `templates/` 是所有生成檔案的來源,填入參數時只做
+`{{PLACEHOLDER}}` 替換,不要改寫模板其他內容。
+
+## 步驟 0:偵測既有狀態
+
+- 若 `.claude/cowork.md` 已存在:讀取其 `cowork-kit-version` 標記。
+  - 版本與本 plugin 模板相同 → 告知使用者已初始化過,問是否要重新
+    問答覆寫設定,不要就結束。
+  - 版本較舊 → 這是升級:保留使用者原本的參數值,用新模板重新生成
+    設定檔與 WORKFLOW.md(以及 AGENTS.md 協定段落),列出協定變更
+    給使用者確認後才寫入。
+- 若不在 git repo 內,先告知並詢問是否 `git init`。
+
+## 步驟 1:收集參數(AskUserQuestion)
+
+1. **main_branch**:先用 `git symbolic-ref refs/remotes/origin/HEAD`
+   或現有分支偵測,偵測結果當預設值請使用者確認。
+2. **implementer(後端 + 模型)**:兩段式問答——
+   - 後端:`claude`(plugin 內建 implementer subagent)、`codex`
+     (透過 /codex:rescue 委派)、`opencode`(透過 opencode CLI
+     委派)。
+   - 模型(依後端給選項):claude → `opus`(預設)或 `sonnet`;
+     codex → `gpt-5.6`(預設)或 `gpt-5.5`;opencode → 完整
+     `provider/model` 字串,例如 `zai/glm-5.2`。
+   兩者分別寫進 `implementer` 與 `implementer_model` 欄位。
+3. **commit gates**:請使用者提供依序執行的測試/檢查指令(至少一個,
+   例如 `make test`、`npm test`)。同時詢問有沒有 gate 之間的注意
+   事項(例如「跑完 unit test 要重編 production binary」「e2e 失敗
+   先跑某恢復程序再重試」),沒有就填「(無)」。
+4. **approval**:`ask`(branch 名/commit/push/PR 都先經使用者核准,
+   預設)或 `auto`(全自動,task-loop 不停下來問)。
+5. **commit_language / chat_language**:預設 commit/PR 英文、對話
+   繁體中文,請使用者確認。
+6. **專案特有審查提醒**:review 時需要人工特別檢查的改動類型(例如
+   lock-free、加密邏輯),沒有就填「(無)」。
+
+## 步驟 2:生成檔案
+
+1. `templates/cowork-config.md` 填入參數 → 寫到 `.claude/cowork.md`。
+   gates 以 markdown 有序清單呈現(`1. <指令> — <一句話說明>`)。
+2. `templates/WORKFLOW.md` → 複製到專案根目錄 `WORKFLOW.md`。已存在
+   且非 cowork 生成(沒有版本標記)時,先問過使用者才覆寫。
+3. 把 `artifacts/` 加進 `.gitignore`(已有就跳過)。
+4. **僅當 implementer 為 codex 或 opencode**(外部 CLI 實作端只
+   讀得到 repo 內的檔案):
+   - `templates/AGENTS-section.md` 合併進專案根目錄 `AGENTS.md`:
+     檔案不存在就直接建立;已存在則 **append 到檔尾**,不可覆寫既有
+     內容;已有舊版 cowork 段落(認版本標記)則只替換該段落。
+   - 確認 `CLAUDE.md` 引用了 `@AGENTS.md`:沒有 CLAUDE.md 就建立
+     一行套殼(`@AGENTS.md`);已有 CLAUDE.md 但沒引用就在開頭加上。
+   - implementer 為 claude 時完全跳過本步驟,不動 AGENTS.md。
+
+## 步驟 3:環境檢查(doctor)
+
+逐項檢查並回報,失敗不中止、列出修法:
+
+- 在 git repo 內、`main_branch` 分支存在。
+- `gh auth status` 通過(committer 建 PR 需要;無 remote 的純本地
+  repo 可標記為「略過,之後要建 PR 再處理」)。
+- implementer 為 codex 時:openai-codex plugin 已安裝
+  (`/codex:rescue` 可用)。順帶提醒:若該環境的 Codex sandbox 需要
+  額外設定(如 `.codex/config.toml`、環境變數覆寫),屬於環境層設定,
+  請使用者自行確認,init 不代管;若 /codex:rescue 不支援指定模型,
+  `implementer_model` 需自行設定在 `.codex/config.toml` 的 `model`
+  欄位,init 提醒使用者確認兩者一致。
+- implementer 為 opencode 時:`opencode` CLI 已安裝(`opencode
+  --version`),且 `implementer_model` 的 provider 已完成認證
+  (`opencode auth login`)。
+
+## 步驟 4:總結
+
+列出生成/修改的檔案清單、選定的參數,並提示:
+- 之後改參數直接編輯 `.claude/cowork.md`,不用重跑 init。
+- plugin 升級後重跑 `/cowork:init` 可升級 repo 內的協定 snapshot
+  (WORKFLOW.md 與 AGENTS.md 段落)。
+- 開始跑任務用 `/cowork:task-loop`。
