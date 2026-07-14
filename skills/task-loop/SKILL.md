@@ -56,8 +56,15 @@ cowork 協定段落(認 `cowork-kit-version` 標記)——從 claude 切換
 - 續接(error 處理、review 修正):`/codex:rescue --resume --wait
   <prompt>`,同一個 thread 續作。
 - 模型:若 /codex:rescue 支援指定模型就帶入 `implementer_model`;
-  不支援則以 `.codex/config.toml` 的 `model` 為準,發現兩者不一致
-  時提醒使用者。
+  不支援則以 `~/.codex/config.toml` 的 `model` 為準,發現兩者不
+  一致時提醒使用者。
+- Sandbox:companion 開新 thread 會硬編 `workspace-write`,repo
+  `.codex/config.toml` 的設定無效。任務需要 sandbox 外能力時,開
+  新 thread 要帶 `CODEX_COMPANION_SANDBOX=danger-full-access`
+  (前提:companion script 已 patch 支援;thread 權限開啟時固定,
+  resume 不能升級,所以要在**第一次委派**就帶上)。Codex 委派連續
+  失敗在權限類錯誤(socket bind、git 寫入、網路不通)時,先懷疑
+  sandbox 而不是程式碼,對照 init doctor 的 sandbox 檢查項。
 
 **implementer: claude**
 - 委派:Agent tool 呼叫 `implementer` subagent,

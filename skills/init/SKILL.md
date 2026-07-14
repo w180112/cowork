@@ -67,11 +67,29 @@ description: 初始化 cowork task-loop 工作流——問答收集專案參數(
 - `gh auth status` 通過(committer 建 PR 需要;無 remote 的純本地
   repo 可標記為「略過,之後要建 PR 再處理」)。
 - implementer 為 codex 時:openai-codex plugin 已安裝
-  (`/codex:rescue` 可用)。順帶提醒:若該環境的 Codex sandbox 需要
-  額外設定(如 `.codex/config.toml`、環境變數覆寫),屬於環境層設定,
-  請使用者自行確認,init 不代管;若 /codex:rescue 不支援指定模型,
-  `implementer_model` 需自行設定在 `.codex/config.toml` 的 `model`
-  欄位,init 提醒使用者確認兩者一致。
+  (`/codex:rescue` 可用)。若 /codex:rescue 不支援指定模型,
+  `implementer_model` 需自行設定在 `~/.codex/config.toml` 的
+  `model` 欄位,init 提醒使用者確認兩者一致。
+- implementer 為 codex 時,額外檢查以下 **sandbox 已知陷阱**
+  (實測踩過,不是假設性提醒),逐項回報現況:
+  1. **companion 每輪強制 `sandbox=workspace-write`**——plugin 的
+     `codex-companion.mjs` 開 thread 時硬編傳入 sandbox 參數,repo
+     `.codex/config.toml` 的 `danger-full-access` 會被蓋掉、無效。
+     若任務需要 sandbox 外的能力(Unix socket bind、`.git` 寫入、
+     SSH 等),companion script 需 patch 成支援
+     `CODEX_COMPANION_SANDBOX` 環境變數覆寫,且 **plugin 更新後
+     patch 會被蓋掉,要重新套用**。檢查方式:grep companion script
+     裡有沒有 `CODEX_COMPANION_SANDBOX`。
+  2. **workspace-write 下預設沒有網路**——若 gate 需要對外連線
+     (loopback、測試容器),確認 `~/.codex/config.toml` 有:
+     ```toml
+     [sandbox_workspace_write]
+     network_access = true
+     ```
+  3. **codex app-server 是常駐進程,config 只在啟動時讀一次**——
+     改過 `~/.codex/config.toml`(包含上面兩項)之後,要 kill 掉
+     broker(`app-server-broker.mjs`)與 `codex app-server` 進程,
+     下一輪委派才會拉到新設定。
 - implementer 為 opencode 時:`opencode` CLI 已安裝(`opencode
   --version`),且 `implementer_model` 的 provider 已完成認證
   (`opencode auth login`)。
