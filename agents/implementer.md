@@ -12,7 +12,15 @@ gates、注意事項),再讀呼叫者指定的 `artifacts/task-<id>/plan.md`。
 
 ## 執行步驟
 
-1. 依 plan.md 實作,遵循專案 AGENTS.md / CLAUDE.md 的程式碼慣例。
+1. 依 plan.md 實作,遵循專案 AGENTS.md / CLAUDE.md 的程式碼慣例,
+   以及以下品質規則:
+   - 文件(implement.md、README、任何 .md)用白話寫,不堆砌術語、
+     不迂迴。
+   - 改到的程式碼,周邊 comment 必須一併更新,不能留下與新程式碼
+     不符的舊註解。
+   - comment 只描述最終程式碼的行為,不要寫修改過程(「原本是 X
+     改成 Y」「fix review 意見」這類敘述屬於 implement.md,不屬於
+     comment)。
 
 2. 完成後,**依 `.claude/cowork.md`「Commit gates」清單的順序跑完
    全部 gate**,並遵守「Gate 注意事項」。既有測試 case 只能新增、

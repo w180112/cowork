@@ -1,6 +1,6 @@
 # Task-loop 協定規格
 
-<!-- cowork-kit-version: 1(由 /cowork:init 生成,升級協定請重跑 init)-->
+<!-- cowork-kit-version: 2(由 /cowork:init 生成,升級協定請重跑 init)-->
 
 本文件是 Claude Code(規劃 / 審查 / 整合)與實作端(Codex 或 Claude
 subagent,見 `.claude/cowork.md` 的 implementer 設定)之間交接的唯一

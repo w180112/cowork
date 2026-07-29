@@ -1,9 +1,10 @@
 # cowork task-loop 專案設定
 
-<!-- cowork-kit-version: 1 -->
+<!-- cowork-kit-version: 2 -->
 
 task-loop skill 每輪開始時讀取本檔案。修改設定直接改這裡即可,
 不需要重跑 /cowork:init(重跑 init 用於升級協定版本或重新問答)。
+換 implementer 後端 / 模型可用 `/cowork:model`。
 
 - main_branch: {{MAIN_BRANCH}}
 - implementer: {{IMPLEMENTER}}         <!-- claude | codex | opencode;隨時可改,下次委派生效。

@@ -61,7 +61,8 @@ init 會生成:
    停下來等你確認拆分合理才開跑。
 2. **每一輪**(一個任務):
    - 提 branch 名(`approval: ask` 時等你核准)→ branch-setup 開分支
-   - Claude Code 寫 `artifacts/task-<id>/plan.md`
+   - Claude Code 先跟你溝通設計構想(每個任務都會,`auto` 也不跳過),
+     同意後才寫 `artifacts/task-<id>/plan.md`
    - 委派 implementer 實作 + 跑 gates
    - Claude Code review(gates 逐項驗、audit diff 是否符合摘要),
      有問題就退回修正,直到 `STATUS: PASS`
@@ -70,10 +71,16 @@ init 會生成:
    - root_plan.md 打勾,進下一個任務
 3. 中斷後說「continue task loop」即可從第一個未勾選任務接續。
 
-## 切換 implementer / 模型
+## 切換 implementer / 模型:`/cowork:model`
 
-編輯 `.claude/cowork.md` 的 `implementer` 與 `implementer_model`
-欄位即可,下一次委派生效:
+```
+/cowork:model                 # 不帶參數:跳問答,選後端 + 模型
+/cowork:model sonnet          # 只給模型:後端不變,claude 從 opus 換成 sonnet
+/cowork:model codex gpt-5.5   # 後端 + 模型一起換:換成 codex 跑 gpt-5.5
+```
+
+改的就是 `.claude/cowork.md` 的 `implementer` / `implementer_model`
+兩行(手動編輯也一樣),下一次委派生效:
 
 - **只換模型**(如 opus → sonnet、gpt-5.6 → gpt-5.5):改
   `implementer_model` 一行就好。codex 後端若 `/codex:rescue` 不支援

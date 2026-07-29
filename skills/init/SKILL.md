@@ -97,7 +97,8 @@ description: 初始化 cowork task-loop 工作流——問答收集專案參數(
 ## 步驟 4:總結
 
 列出生成/修改的檔案清單、選定的參數,並提示:
-- 之後改參數直接編輯 `.claude/cowork.md`,不用重跑 init。
+- 之後改參數直接編輯 `.claude/cowork.md`,不用重跑 init;只要換
+  implementer 後端 / 模型可以用 `/cowork:model`。
 - plugin 升級後重跑 `/cowork:init` 可升級 repo 內的協定 snapshot
   (WORKFLOW.md 與 AGENTS.md 段落)。
 - 開始跑任務用 `/cowork:task-loop`。

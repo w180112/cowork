@@ -1,7 +1,7 @@
 {
     "name": "cowork",
-    "description": "Claude Code(規劃/審查)+ 可替換實作端(Codex 或 Claude subagent)的 task-loop 雙 agent 工作流。/cowork:init 初始化專案,/cowork:task-loop 執行任務迴圈。",
-    "version": "1.0.0",
+    "description": "Claude Code(規劃/審查)+ 可替換實作端(Codex 或 Claude subagent)的 task-loop 雙 agent 工作流。/cowork:init 初始化專案,/cowork:task-loop 執行任務迴圈,/cowork:model 切換實作端模型。",
+    "version": "1.1.0",
     "author": {
         "name": "w180112"
     }

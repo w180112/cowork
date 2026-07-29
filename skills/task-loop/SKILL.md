@@ -95,13 +95,17 @@ cowork 協定段落(認 `cowork-kit-version` 標記)——從 claude 切換
    傳入 branch 名稱與 cowork.md 的 `main_branch`,由它執行
    checkout / pull / 開新分支。
 
-3. 建立 `artifacts/task-<id>/`,依 WORKFLOW.md 的格式寫 `plan.md`。
+3. **寫 plan.md 前先跟使用者溝通設計構想**:用幾句話說明你打算怎麼
+   做(方向、要動哪些檔案、取捨),等使用者同意才動筆;有不同意見
+   就先討論修改。這一步不受 `approval: auto` 影響,每個任務都要做。
 
-4. 依 implementer adapter 委派實作:「依照
+4. 建立 `artifacts/task-<id>/`,依 WORKFLOW.md 的格式寫 `plan.md`。
+
+5. 依 implementer adapter 委派實作:「依照
    `artifacts/task-<id>/plan.md` 實作,完成後依照 WORKFLOW.md 協定
    寫 implement.md 或 error.md」。
 
-5. 若實作端產出 `error.md`:
+6. 若實作端產出 `error.md`:
 
    - 判斷原因,把處理方式寫進
      `artifacts/task-<id>/error_resolution.md`(或直接更新 plan.md
@@ -109,7 +113,7 @@ cowork 協定段落(認 `cowork-kit-version` 標記)——從 claude 切換
    - 寫完才刪除 `error.md`
    - 依 adapter 續接,附上處理方式,請實作端繼續
 
-6. 若實作端產出新版本的 `implement.md`(version 比上次看到的大):
+7. 若實作端產出新版本的 `implement.md`(version 比上次看到的大):
 
    - 讀取內容,進行 code review,並 audit「變更摘要」是否真的符合
      「檔案異動清單」與實際 diff
@@ -119,19 +123,24 @@ cowork 協定段落(認 `cowork-kit-version` 標記)——從 claude 切換
    - **確認沒有修改既有測試 case**(只能新增——既有 case 是
      regression baseline;若懷疑既有 case 本身有錯,應該出現在
      implement.md 的說明裡回報,而不是被改掉)
+   - **檢查 comment 品質**:改到的程式碼周邊 comment 有沒有跟著
+     更新、有沒有寫成修改過程(「原本是 X 改成 Y」這類敘述不該
+     出現在 comment 裡,comment 只描述最終程式碼的行為)
+   - 文件類產出(implement.md、README 等)是否白話易讀,不是就
+     一併列入修改項目
    - cowork.md「專案特有審查提醒」有列的改動類型,不能只看測試綠燈,
      務必親自檢查邏輯正確性
    - 有問題:寫 `review.md`(`STATUS: CHANGES_REQUESTED`,列出具體
      修改項目),依 adapter 續接附上 review.md 內容請實作端修正,
-     回到步驟 5 繼續處理
+     回到步驟 6 繼續處理
    - 沒問題:寫 `review.md`(`STATUS: PASS`)
 
-7. STATUS: PASS 後的 commit 交接:`approval: ask` 時,先把預計的
+8. STATUS: PASS 後的 commit 交接:`approval: ask` 時,先把預計的
    commit message 摘要與 PR 標題列給使用者核准才能繼續;
    `approval: auto` 時直接進行。呼叫 `committer` subagent,傳入
    `artifacts/task-<id>/implement.md` 的內容與 branch / commit / PR
    資訊,由它執行 commit、push、建立 PR。
 
-8. 在 `root_plan.md` 把該任務打勾,回到步驟 1 處理下一個未完成任務,
-   直到全部完成。`approval: ask` 時每一輪的步驟 2、7 都要重新取得
-   核准,前一輪的同意不延用。
+9. 在 `root_plan.md` 把該任務打勾,回到步驟 1 處理下一個未完成任務,
+   直到全部完成。步驟 3 的設計溝通每一輪都要做;`approval: ask` 時
+   每一輪的步驟 2、8 也都要重新取得核准,前一輪的同意不延用。
