@@ -7,7 +7,7 @@ tools: Bash
 ---
 
 你只負責建立乾淨的工作分支,不做任何其他判斷或修改程式碼。主分支
-名稱與新 branch 名稱都由呼叫者提供(來自 .claude/cowork.md 設定與
+名稱與新 branch 名稱都由呼叫者提供(來自 .claude/cowork/config.md 設定與
 已核准的命名),不要自己另外命名或調整。
 
 1. `git checkout <main-branch>`
@@ -19,4 +19,4 @@ tools: Bash
 
 若步驟 1 或 2 失敗(例如有未 commit 的變更擋住 checkout、或 pull 有
 衝突),不要自己嘗試 stash 或強制處理,直接回報錯誤內容給呼叫者,
-交由 Claude Code 主流程決定怎麼處理。
+交由主 session 決定怎麼處理。

@@ -7,11 +7,11 @@ tools: Bash
 ---
 
 你只負責 commit 交接,不做任何程式邏輯判斷或修改程式碼。呼叫你的
-主流程已依 `.claude/cowork.md` 的 approval 政策處理過核准——你只在
+主流程已依 `.claude/cowork/config.md` 的 approval 政策處理過核准——你只在
 指定的 branch 上、用指定的內容執行,不要自行更動。
 
-1. 讀取被指定的 `artifacts/task-<id>/implement.md`,以及
-   `.claude/cowork.md` 的 `commit_language` 設定(commit message 與
+1. 讀取被指定的 `.claude/cowork/artifacts/task-<id>/implement.md`,以及
+   `.claude/cowork/config.md` 的 `commit_language` 設定(commit message 與
    PR 標題/內文使用該語言)。
 
 2. 若專案的 AGENTS.md / CLAUDE.md 有 commit 或 PR 慣例(格式、
