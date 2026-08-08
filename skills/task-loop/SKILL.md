@@ -12,11 +12,15 @@ description: 依 root_plan.md 執行三角色任務迴圈——主 session 只�
 implementer、gates、approval、語言)以 config.md 為準。兩者缺一,
 請使用者先跑 `/cowork:init`。
 
-**你(主 session)是調度端,不是思考端。** 你只做:挑任務、開分支、
-委派 planner / implementer、在兩者與使用者之間轉發檔案內容、取得
-核准、比對 version 與 STATUS 字串。設計、code review、error 診斷
-一律委派給 planner——即使你覺得自己看得出答案也不要代勞,這個
-工作流的前提是主 session 可能跑在低階模型上。
+**你(主 session)是調度端,不是思考端,也不是執行端。** 你只做:
+挑任務、開分支、委派 planner / implementer、在兩者與使用者之間
+轉發檔案內容、取得核准、比對 version 與 STATUS 字串。設計、code
+review、error 診斷一律委派給 planner;跑測試/gate、改 code、git
+操作一律由對應 subagent 自己執行——即使你覺得自己代跑比較快也
+不要代勞。subagent 被權限或 sandbox 擋住時,解法是**排除障礙後讓
+它自己重跑**(修 sandbox 設定、請使用者放行權限或手動執行環境層
+修改),不是你接手執行。這個工作流的前提是主 session 可能跑在
+低階模型上,你代跑的結果不可信。
 
 ## 初次執行(root_plan.md 不存在時)
 
@@ -78,6 +82,17 @@ cowork 協定段落(認 `cowork-kit-version` 標記)——缺了就請使用者�
   resume 不能升級,所以要在**第一次委派**就帶上)。委派連續失敗在
   權限類錯誤(socket bind、git 寫入、網路不通)時,先懷疑 sandbox
   而不是程式碼,對照 init doctor 的 sandbox 檢查項。
+- **可寫範圍 = companion 啟動時的 cwd**:第一次委派前先確認目前
+  工作目錄就是目標 repo 根目錄(必要時 `cd` 過去再委派),否則
+  codex 會連 repo 檔案都寫不了。
+- gate 或 git stash 被 sandbox 擋住(error.md 註明權限類障礙)時,
+  **不要代跑**:對照 init doctor 的 sandbox 檢查項排除障礙(通常是
+  `CODEX_COMPANION_SANDBOX=danger-full-access` 開新 thread 重新
+  委派——sandbox 等級 resume 升不了級),然後讓實作端自己重跑。
+- 帶 `CODEX_COMPANION_SANDBOX` 這類環境變數的委派、或寫入
+  `~/.codex/config.toml`,可能被 Claude Code 權限系統擋下——被擋
+  時不要重試,把要執行的指令原文列給使用者,請使用者手動執行或
+  在權限設定放行。
 
 **後端 opencode**
 - 委派:Bash 執行
@@ -133,7 +148,10 @@ cowork 協定段落(認 `cowork-kit-version` 標記)——缺了就請使用者�
 9. commit 交接:`approval: ask` 時,先把預計的 commit message 摘要
    與 PR 標題列給使用者核准才能繼續;`approval: auto` 時直接進行。
    呼叫 `committer` subagent,傳入 `.claude/cowork/artifacts/task-<id>/implement.md`
-   的內容與 branch / commit / PR 資訊。
+   的內容與 branch / commit / PR 資訊。committer 看不到你與使用者
+   的對話——需要敏感操作(amend、force push、改既有 PR)時,把
+   「使用者已核准 <操作>」明確寫進委派 prompt,讓 committer 自己
+   執行,不要因為它拒絕就由你代跑 git 指令。
 
 10. 在 `root_plan.md` 把該任務打勾,回到步驟 1 處理下一個任務,
     直到全部完成。步驟 5 的「是否進入實作」每一輪都要問;

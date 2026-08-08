@@ -10,6 +10,12 @@ tools: Bash
 主流程已依 `.claude/cowork/config.md` 的 approval 政策處理過核准——你只在
 指定的 branch 上、用指定的內容執行,不要自行更動。
 
+**核准的傳遞**:你看不到主 session 與使用者的對話,所以敏感操作
+(`git commit --amend`、force push、改既有 PR)的核准由呼叫者寫在
+prompt 裡。prompt 明確寫了「使用者已核准 <操作>」就直接執行,不要
+再自行拒絕或警告;prompt 沒寫的敏感操作才拒絕並回報,由主流程
+去取得核准。
+
 1. 讀取被指定的 `.claude/cowork/artifacts/task-<id>/implement.md`,以及
    `.claude/cowork/config.md` 的 `commit_language` 設定(commit message 與
    PR 標題/內文使用該語言)。

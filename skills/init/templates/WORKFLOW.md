@@ -1,6 +1,6 @@
 # Task-loop 協定規格
 
-<!-- cowork-kit-version: 3(由 /cowork:init 生成,升級協定請重跑 init)-->
+<!-- cowork-kit-version: 4(由 /cowork:init 生成,升級協定請重跑 init)-->
 
 本文件是 task-loop 三個角色之間交接的唯一事實來源。實際的檔案格式、
 狀態欄位、版本規則以本文件為準。
@@ -104,6 +104,20 @@ timestamp: <ISO 8601>
 卡死的關鍵規則,實作端每次因應意見修正完,一定要把這個數字加一並整份
 重寫這個檔案。
 
+### Gate 被 sandbox 擋住時
+
+所有 gate 一律由實作端自己跑,主 session 不代跑。實作端跑在
+sandbox 裡(如 codex 的 workspace-write)而 gate 需要 sandbox 外的
+資源(裝置檔、特權網路、workspace 外路徑)時:
+
+1. 實作端寫 `error.md` 註明是 sandbox 權限擋住哪個 gate(不算
+   自己造成的錯誤,不用 stash 診斷)。
+2. 主 session 對照 init doctor 的 sandbox 檢查項排除障礙——放寬
+   sandbox(`CODEX_COMPANION_SANDBOX=danger-full-access` 開新
+   thread、`network_access = true` 等)或請使用者手動調整。
+3. 障礙排除後續接(sandbox 等級 resume 升不了級的,得開新 thread
+   重新委派),讓實作端**自己重跑**全部 gate、自己寫 implement.md。
+
 ## review.md 格式
 
 planner 撰寫,格式:
@@ -141,6 +155,9 @@ version_at_error: <當時的 implement.md version>
 - 基準(stash 後)也失敗 → 不是自己造成的,寫 `error.md`。
 - 基準通過、只有改動後失敗 → 是自己造成的,`git stash pop` 還原後
   直接修正,不寫 `error.md`。
+- sandbox 擋住 `.git` 寫入、stash 跑不了 → 在 error.md 註明
+  「基準未驗證(sandbox 擋 stash)」,不要卡在原地重試;主 session
+  會放寬 sandbox 後讓你自己重跑診斷。
 
 `error.md` 由 planner 診斷,**必須先把處理方式寫進
 `error_resolution.md` 或更新 `plan.md`**,主 session 才能刪除

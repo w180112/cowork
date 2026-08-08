@@ -1,6 +1,6 @@
 # cowork task-loop 專案設定
 
-<!-- cowork-kit-version: 3 -->
+<!-- cowork-kit-version: 4 -->
 
 task-loop skill 每輪開始時讀取本檔案。修改設定直接改這裡即可,
 不需要重跑 /cowork:init(重跑 init 用於升級協定版本或重新問答)。
@@ -23,6 +23,11 @@ task-loop skill 每輪開始時讀取本檔案。修改設定直接改這裡即�
 - chat_language: {{CHAT_LANGUAGE}}
 
 ## Commit gates(依序執行,全部通過才能 PASS)
+
+<!-- 所有 gate 一律由實作端自己跑。gate 需要 sandbox 外資源
+     (裝置檔、特權網路等)時,解法是放寬實作端的 sandbox,
+     不是主 session 代跑(見 WORKFLOW.md「Gate 被 sandbox
+     擋住時」)。 -->
 
 {{GATES}}
 

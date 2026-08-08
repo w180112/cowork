@@ -1,4 +1,4 @@
-<!-- cowork-kit-version: 3 — 本段由 /cowork:init 生成,升級協定請重跑 init -->
+<!-- cowork-kit-version: 4 — 本段由 /cowork:init 生成,升級協定請重跑 init -->
 # 實作端職責(task-loop 協定)
 
 本段給外部 CLI 實作端(Codex、OpenCode 等透過 AGENTS.md 載入指令的
@@ -16,7 +16,10 @@ agent)遵循。本段只在你被委派**實作**時適用;若當次 prompt 委�
 
 2. 依 plan.md 實作,依循本檔案的程式碼慣例,完成後**依
    `.claude/cowork/config.md`「Commit gates」清單的順序跑完全部 gate**,
-   並遵守「Gate 注意事項」。品質規則:
+   並遵守「Gate 注意事項」。gate 被 sandbox 權限擋住跑不了時,寫
+   error.md 註明是哪個 gate 被什麼擋住(協定見 WORKFLOW.md「Gate
+   被 sandbox 擋住時」),等 sandbox 放寬後你會被要求自己重跑——
+   不要略過 gate 也不要假設別人會代跑。品質規則:
    - 文件(implement.md、README、任何 .md)用白話寫,不堆砌術語、
      不迂迴。
    - 改到的程式碼,周邊 comment 必須一併更新,不能留下與新程式碼
@@ -37,6 +40,9 @@ agent)遵循。本段只在你被委派**實作**時適用;若當次 prompt 委�
      `.claude/cowork/artifacts/task-<id>/error.md`(格式見 WORKFLOW.md),結束這一輪。
    - 基準通過、只有你的改動後失敗 → 是你造成的,直接修正後重跑,
      不要寫 error.md。
+   - sandbox 擋住 `.git` 寫入、stash 跑不了 → 在 error.md 註明
+     「基準未驗證(sandbox 擋 stash)」,不要卡在原地重試;sandbox
+     放寬後你會被要求自己重跑診斷。
 
 4. 測試全部通過後,寫入 `.claude/cowork/artifacts/task-<id>/implement.md`(格式見
    WORKFLOW.md,注意 version 欄位)。「測試結果」必須涵蓋 gates

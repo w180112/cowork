@@ -20,7 +20,7 @@ description: 初始化 cowork task-loop 工作流——問答收集專案參數(
     給使用者確認後才寫入。
 - 若只有**舊版位置**的檔案(`.claude/cowork.md`、根目錄
   `WORKFLOW.md` / `root_plan.md` / `artifacts/`,kit-version ≤ 2
-  的配置):視為升級,參數照上一條處理,並把 root_plan.md 與
+  的舊配置):視為升級,參數照上一條處理,並把 root_plan.md 與
   artifacts/ 搬進 `.claude/cowork/`、刪除根目錄的 WORKFLOW.md 與
   舊 `.claude/cowork.md`,`.gitignore` 裡的舊 `artifacts/` 條目
   換成新路徑。
@@ -111,9 +111,19 @@ description: 初始化 cowork task-loop 工作流——問答收集專案參數(
      改過 `~/.codex/config.toml`(包含上面兩項)之後,要 kill 掉
      broker(`app-server-broker.mjs`)與 `codex app-server` 進程,
      下一輪委派才會拉到新設定。
+  4. **可寫範圍 = companion 啟動時的 cwd**——委派前工作目錄必須是
+     目標 repo 根目錄,否則 codex 連 repo 檔案都寫不了。
+  以上涉及 `~/.codex/config.toml` 的修正,**doctor 不要代寫**
+  (home 目錄設定檔常被權限系統擋,擋下後重試只是浪費一輪)——把
+  要加的內容原文列出,請使用者手動加或明確核准後再寫。
 - 任一角色為 opencode 時:`opencode` CLI 已安裝(`opencode
   --version`),且該角色 model 的 provider 已完成認證
   (`opencode auth login`)。
+- **權限預放行**:task-loop 執行中常見指令若沒放行,每輪都會跳
+  permission prompt 或被 auto 模式擋下(委派 codex/opencode 的
+  Bash 呼叫、gh 唯讀查詢如 `gh pr view` / `gh pr checks` 等)。
+  列出建議的 `permissions.allow` 清單,詢問使用者要不要寫進專案
+  `.claude/settings.local.json`(要才寫,不要代決定)。
 
 ## 步驟 4:總結
 
