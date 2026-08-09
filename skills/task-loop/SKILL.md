@@ -73,13 +73,24 @@ cowork 協定段落(認 `cowork-kit-version` 標記)——缺了就請使用者�
   規則),保留其既有 context;不要另開新 agent。
 
 **後端 codex**
-- 委派:`/codex:rescue --wait <prompt>`(嚴格序列執行;底層是
-  codex-rescue subagent,可能以背景 task 執行——完成與否依上面
-  「完成訊號」規則,不要假設呼叫回來就是做完了)。planner 角色的
-  prompt 要指明階段(規劃/審查/錯誤診斷)並指向 WORKFLOW.md 的
-  格式與檢查清單。
-- 續接:`/codex:rescue --resume --wait <prompt>`,同一個 thread
-  續作。
+- **10 分鐘陷阱**:`--wait` 是前景 rescue subagent 裡的一個 Bash
+  呼叫,受 Bash 10 分鐘上限——codex 跑超過,Bash 被砍、rescue
+  agent 依契約回傳空字串,完成訊號直接消失(codex thread 在常駐
+  app-server 上可能還在跑)。所以:
+  - 短任務(planner 的審查/診斷)→ `/codex:rescue --wait <prompt>`。
+  - 可能超過 10 分鐘的(實作任務一律當作會超過)→
+    `/codex:rescue --background <prompt>`,從回覆記下 jobId,然後
+    用 Bash 呼叫 companion 長輪詢等完成:
+    `node <codex plugin>/scripts/codex-companion.mjs status <jobId>
+    --wait --timeout-ms 540000`(9 分鐘一輪,沒完成就再呼叫一次;
+    這是等訊號,不是替它做事),完成後 `... result <jobId>` 取
+    輸出,再走「狀態判讀」。
+  - rescue 回傳空字串 ≠ 失敗:先 `status` 查 thread 是否還在跑,
+    不要直接重新委派(會開新 thread 分岔)。
+- 委派 prompt(planner 角色)要指明階段(規劃/審查/錯誤診斷)並
+  指向 WORKFLOW.md 的格式與檢查清單。
+- 續接:`/codex:rescue --resume <prompt>`(--wait / --background
+  規則同上),同一個 thread 續作。
 - 模型:若 /codex:rescue 支援指定模型就帶入該角色的 model 欄位;
   不支援則以 `~/.codex/config.toml` 的 `model` 為準,發現兩者不
   一致時提醒使用者。
