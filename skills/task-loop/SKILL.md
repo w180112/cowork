@@ -58,20 +58,26 @@ cowork 協定段落(認 `cowork-kit-version` 標記)——缺了就請使用者�
 `/codex:rescue --resume` 只會續接最後一個 thread,兩個角色會互相
 搶線(init doctor 會擋)。
 
+**完成訊號(三個後端通用)**:委派或續接送出後,若沒有同步拿到
+結果(工具回報的是背景 task),就結束這一輪回覆、等 task 完成
+通知——不要輪詢、不要當作已完成往下走、也不要在等待時先做後面的
+步驟。被喚醒後一律先走「狀態判讀」,以 artifacts 檔案為準,不要
+只信 agent 回覆的文字。
+
 **後端 claude**
 - 委派:Agent tool 呼叫對應 subagent(planner 角色用 `planner`、
   implementer 角色用 `implementer`),`run_in_background: false`,
   `model` 參數帶入該角色的 model 欄位,prompt 附上階段說明與 task
   路徑 `.claude/cowork/artifacts/task-<id>/`。協定指令在 agent 定義裡,不用重述。
-- 續接:對同一個 agent 用 SendMessage,保留其既有 context;不要
-  另開新 agent。**SendMessage 是非同步的**:送出後就結束這一輪
-  回覆、等 task 完成通知,不要自己輪詢、也不要當作已完成往下走;
-  收到通知後依「狀態判讀」行動。
+- 續接:對同一個 agent 用 SendMessage(非同步,走「完成訊號」
+  規則),保留其既有 context;不要另開新 agent。
 
 **後端 codex**
-- 委派:`/codex:rescue --wait <prompt>`(嚴格序列執行,直接阻塞到
-  完成,不要自己輪詢)。planner 角色的 prompt 要指明階段(規劃/
-  審查/錯誤診斷)並指向 WORKFLOW.md 的格式與檢查清單。
+- 委派:`/codex:rescue --wait <prompt>`(嚴格序列執行;底層是
+  codex-rescue subagent,可能以背景 task 執行——完成與否依上面
+  「完成訊號」規則,不要假設呼叫回來就是做完了)。planner 角色的
+  prompt 要指明階段(規劃/審查/錯誤診斷)並指向 WORKFLOW.md 的
+  格式與檢查清單。
 - 續接:`/codex:rescue --resume --wait <prompt>`,同一個 thread
   續作。
 - 模型:若 /codex:rescue 支援指定模型就帶入該角色的 model 欄位;
