@@ -64,7 +64,9 @@ cowork 協定段落(認 `cowork-kit-version` 標記)——缺了就請使用者�
   `model` 參數帶入該角色的 model 欄位,prompt 附上階段說明與 task
   路徑 `.claude/cowork/artifacts/task-<id>/`。協定指令在 agent 定義裡,不用重述。
 - 續接:對同一個 agent 用 SendMessage,保留其既有 context;不要
-  另開新 agent。
+  另開新 agent。**SendMessage 是非同步的**:送出後就結束這一輪
+  回覆、等 task 完成通知,不要自己輪詢、也不要當作已完成往下走;
+  收到通知後依「狀態判讀」行動。
 
 **後端 codex**
 - 委派:`/codex:rescue --wait <prompt>`(嚴格序列執行,直接阻塞到
@@ -104,6 +106,22 @@ cowork 協定段落(認 `cowork-kit-version` 標記)——缺了就請使用者�
   opencode 時,`--continue` 只會接最後一個 session,續接前用
   `opencode session list` 確認、必要時帶 session id。
 - opencode 會自動載入專案的 AGENTS.md,實作端協定指令不用重述。
+
+## 狀態判讀(被喚醒或不確定進度時一律先做)
+
+subagent 跑完的訊號可能漏接(task 通知、使用者隔了一陣子才回來、
+context 被摘要過)。**協定的唯一事實來源是檔案,不是你的記憶或
+agent 的回覆**——每次收到 task 完成通知、使用者說「繼續」、或你
+不確定現在進行到哪裡時,先讀 `.claude/cowork/artifacts/task-<id>/`
+再決定下一步:
+
+- `error.md` 存在 → 步驟 7
+- `implement.md` 的 version 比 root_plan / 上次紀錄的還大 → 步驟 8
+- `decision.md` 是 `STATUS: WAITING` 且「回答」未填 → 步驟 4
+- `plan.md` 已存在但還沒問過使用者是否進實作 → 步驟 5
+- 檔案都沒變 → agent 可能還在跑或已結束卻沒寫檔:用 TaskOutput
+  查該 agent 的狀態;已結束但協定檔沒產出 → 續接它,要求依
+  WORKFLOW.md 把該寫的檔案補寫完成,不要自己代寫。
 
 ## 每一輪的執行步驟
 
