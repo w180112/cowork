@@ -1,4 +1,4 @@
-<!-- cowork-kit-version: 4 — 本段由 /cowork:init 生成,升級協定請重跑 init -->
+<!-- cowork-kit-version: 5 — 本段由 /cowork:init 生成,升級協定請重跑 init -->
 # 實作端職責(task-loop 協定)
 
 本段給外部 CLI 實作端(Codex、OpenCode 等透過 AGENTS.md 載入指令的
@@ -27,6 +27,14 @@ agent)遵循。本段只在你被委派**實作**時適用;若當次 prompt 委�
    - comment 只描述最終程式碼的行為,不要寫修改過程(「原本是 X
      改成 Y」「fix review 意見」這類敘述屬於 implement.md,不屬於
      comment)。
+
+   長時間 gate(單一前景指令可能撞 timeout 上限,例如完整 e2e)的
+   執行紀律:
+   - 以背景/detach 方式執行,完成與否**直接輪詢輸出檔**判斷;不要
+     自製「等 exit code/完成字樣」的 waiter——除非該訊號的語意你已
+     實際驗證過(很多測試 script 失敗時仍 exit 0)。
+   - 結果一律以測試框架自己的總結行(tally/RESULT 行)為準,exit
+     code 不可信;找不到總結行=未完成或異常,不是通過。
 
 3. 測試失敗時,先執行以下自我診斷再決定下一步:
 

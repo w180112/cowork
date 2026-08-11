@@ -1,6 +1,6 @@
 # Task-loop 協定規格
 
-<!-- cowork-kit-version: 4(由 /cowork:init 生成,升級協定請重跑 init)-->
+<!-- cowork-kit-version: 5(由 /cowork:init 生成,升級協定請重跑 init)-->
 
 本文件是 task-loop 三個角色之間交接的唯一事實來源。實際的檔案格式、
 狀態欄位、版本規則以本文件為準。

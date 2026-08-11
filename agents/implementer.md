@@ -28,6 +28,14 @@ gates、注意事項),再讀呼叫者指定的 `.claude/cowork/artifacts/task-<i
    不能修改——它們是 regression baseline;若懷疑既有 case 本身有錯,
    寫進 implement.md 回報,不要自己動手改。
 
+   長時間 gate(單一前景指令可能撞 timeout 上限,例如完整 e2e)的
+   執行紀律:
+   - 以背景/detach 方式執行,完成與否**直接輪詢輸出檔**判斷;不要
+     自製「等 exit code/完成字樣」的 waiter——除非該訊號的語意你已
+     實際驗證過(很多測試 script 失敗時仍 exit 0)。
+   - 結果一律以測試框架自己的總結行(tally/RESULT 行)為準,exit
+     code 不可信;找不到總結行=未完成或異常,不是通過。
+
 3. 測試失敗時,先自我診斷再決定下一步:
 
    ```

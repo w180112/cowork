@@ -1,6 +1,6 @@
 # cowork task-loop 專案設定
 
-<!-- cowork-kit-version: 4 -->
+<!-- cowork-kit-version: 5 -->
 
 task-loop skill 每輪開始時讀取本檔案。修改設定直接改這裡即可,
 不需要重跑 /cowork:init(重跑 init 用於升級協定版本或重新問答)。
