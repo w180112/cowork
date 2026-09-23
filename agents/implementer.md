@@ -22,9 +22,14 @@ gates、注意事項),再讀呼叫者指定的 `.claude/cowork/artifacts/task-<i
    - comment 只描述最終程式碼的行為,不要寫修改過程(「原本是 X
      改成 Y」「fix review 意見」這類敘述屬於 implement.md,不屬於
      comment)。
+   - unit test 風格:同主題的測試條件併入同一個(優先為既有)test function,不得為每個條件各開獨立函式;函式名照 test_<被測函式>(一個被測函式對應一個 test function,情境全放函式內斷言),名字必須指向實際存在的函式
+   - comment 三秒原則:一句話、80 字元內講完;只寫程式碼看不出來的
+     約束(鎖序、caller 契約、記憶體序),設計理由歸 plan/implement.md,
+     不寫比較句與指路句。
 
 2. 完成後,**依 `.claude/cowork/config.md`「Commit gates」清單的順序跑完
-   全部 gate**,並遵守「Gate 注意事項」。既有測試 case 只能新增、
+   全部 gate**,並遵守「Gate 注意事項」。 **gate 只能在該 task 要做的事全部做完之後才跑**
+   (跨 repo 的 task:兩邊都做完、controller 已部署到 bench);做到一半不跑 gate。既有測試 case 只能新增、
    不能修改——它們是 regression baseline;若懷疑既有 case 本身有錯,
    寫進 implement.md 回報,不要自己動手改。
 

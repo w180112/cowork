@@ -1,4 +1,4 @@
-<!-- cowork-kit-version: 5 — 本段由 /cowork:init 生成,升級協定請重跑 init -->
+<!-- cowork-kit-version: 6 — 本段由 /cowork:init 生成,升級協定請重跑 init -->
 # 實作端職責(task-loop 協定)
 
 本段給外部 CLI 實作端(Codex、OpenCode 等透過 AGENTS.md 載入指令的
@@ -27,6 +27,10 @@ agent)遵循。本段只在你被委派**實作**時適用;若當次 prompt 委�
    - comment 只描述最終程式碼的行為,不要寫修改過程(「原本是 X
      改成 Y」「fix review 意見」這類敘述屬於 implement.md,不屬於
      comment)。
+   - unit test 風格:同主題的測試條件併入同一個(優先為既有)test function,不得為每個條件各開獨立函式;函式名照 test_<被測函式>(一個被測函式對應一個 test function,情境全放函式內斷言),名字必須指向實際存在的函式
+   - comment 三秒原則:一句話、80 字元內講完;只寫程式碼看不出來的
+     約束(鎖序、caller 契約、記憶體序),設計理由歸 plan/implement.md,
+     不寫比較句與指路句。
 
    長時間 gate(單一前景指令可能撞 timeout 上限,例如完整 e2e)的
    執行紀律:

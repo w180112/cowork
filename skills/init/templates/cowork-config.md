@@ -1,6 +1,6 @@
 # cowork task-loop 專案設定
 
-<!-- cowork-kit-version: 5 -->
+<!-- cowork-kit-version: 6 -->
 
 task-loop skill 每輪開始時讀取本檔案。修改設定直接改這裡即可,
 不需要重跑 /cowork:init(重跑 init 用於升級協定版本或重新問答)。
@@ -20,7 +20,12 @@ task-loop skill 每輪開始時讀取本檔案。修改設定直接改這裡即�
                                                   codex / opencode:同 planner_model 格式 -->
 - approval: {{APPROVAL}}         <!-- ask:branch/commit/PR 都先問使用者 | auto:全自動 -->
 - commit_language: {{COMMIT_LANGUAGE}}
-- chat_language: {{CHAT_LANGUAGE}}
+- chat_language: {{CHAT_LANGUAGE}}   <!-- 技術專有名詞一律保留英文不翻譯
+                                          (source code、memory、server、default、
+                                          process、cache、branch…),chat_language
+                                          只用來寫句子其餘部分 -->
+- approval_scope: branch / commit / push / PR 各自獨立取得同意,前一項的
+  同意不涵蓋下一項,前一輪的同意不延用到下一輪
 
 ## Commit gates(依序執行,全部通過才能 PASS)
 
