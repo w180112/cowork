@@ -50,11 +50,19 @@ review、error 診斷一律委派給 planner;跑測試/gate、改 code、git
 **主 session 與 planner 同模型時的例外**:若主 session 本身跑的模型
 與 `planner_model` 相同或更強(例如兩邊都是 fable),就不再委派
 planner——規劃、寫 plan.md / decision.md、review implement.md、診斷
-error.md 都由主 session 自己做(review.md 同樣要過 `review-checker`);實作仍委派 implementer,流程面要求
+error.md 都由主 session 自己做(plan.md / error_resolution.md 同樣要過
+`plan-checker`,review.md 同樣要過 `review-checker`);實作仍委派 implementer,流程面要求
 (detached、回報三路徑、不 commit/push、不動 index)不變,「合不合理
 由使用者裁決」「狀態事實自己查」「實作/操作不代做」「讀檔走 sonnet
 subagent」也不變。主 session 是較低階模型、或使用者明說要 planner
 時,回到原三角色流程。
+
+**呼叫 checker(plan-checker / review-checker)的 prompt 只給座標,不給
+推理**:prompt 內容限於 task 目錄路徑、要核對的檔名、gate log 位置。
+不得附上 planner 的推理過程或回覆原文、你自己對方案的看法、對話裡的
+討論摘要、「我覺得應該沒問題」之類的預判。checker 要從檔案與 repo
+自己得出結論;帶入原本的推理就是在幫它預設答案,第二雙眼睛就沒了。
+主 session 自己當 planner 時尤其要守——你剛寫完的理由一句都不要帶。
 
 **長時間工作要有真的通知機制**:委派後不要靠自己記得回頭看。用
 背景等待(等 done 檔出現或 PID 消失)換取完成通知,並在回報前
@@ -175,7 +183,8 @@ agent 的回覆**——每次收到 task 完成通知、使用者說「繼續」
 - `error.md` 存在 → 步驟 7
 - `implement.md` 的 version 比 root_plan / 上次紀錄的還大 → 步驟 8
 - `decision.md` 是 `STATUS: WAITING` 且「回答」未填 → 步驟 4
-- `plan.md` 已存在但還沒問過使用者是否進實作 → 步驟 5
+- `plan.md` 已存在但還沒過 `plan-checker`、或還沒問過使用者是否進實作
+  → 步驟 5
 - 檔案都沒變 → agent 可能還在跑或已結束卻沒寫檔:用 TaskOutput
   查該 agent 的狀態;已結束但協定檔沒產出 → 續接它,要求依
   WORKFLOW.md 把該寫的檔案補寫完成,不要自己代寫。
@@ -200,7 +209,10 @@ agent 的回覆**——每次收到 task 完成通知、使用者說「繼續」
    - 把使用者的決定填進各題「回答」欄,STATUS 改成 `ANSWERED`
    - 續接 planner,回到本步驟開頭(可能來回多次)
 
-5. planner 產出 `plan.md` 後,把它的設計摘要轉述給使用者,**問是否
+5. planner 產出 `plan.md` 後,**先呼叫 `plan-checker` subagent**(唯讀,
+   fable):給它 task 路徑,讓它核對格式、路徑存在、驗收條件可驗、修法
+   治本、與 decision.md 一致。回 `CHECK: NG` 就把理由附給 planner 續接
+   修改,回到步驟 4;回 `CHECK: OK` 才把設計摘要轉述給使用者,**問是否
    進入實作**——每個任務都要問,不受 `approval: auto` 影響。使用者
    有意見就轉給 planner 修改,回到步驟 4;同意才往下。
 
@@ -208,8 +220,14 @@ agent 的回覆**——每次收到 task 完成通知、使用者說「繼續」
    完成後依照 WORKFLOW.md 協定寫 implement.md 或 error.md」。
 
 7. 若實作端產出 `error.md`:
-   - 續接 planner(錯誤診斷階段),請它寫 `error_resolution.md`
-   - planner 寫完後,刪除 `error.md`
+   - 先核對四欄(修改前重現 N/N 與手法、每環量測、或「未查明」+ 下一步
+     證據)。缺重現或缺量測 → 不診斷、不派修法,回 implementer「先重現
+     N 次並取證」;planner 也不得自己提修法。
+   - 四欄齊了才續接 planner(錯誤診斷階段),請它寫 `error_resolution.md`
+   - planner 寫完後,**先呼叫 `plan-checker` subagent**(唯讀,fable)核對
+     error_resolution.md:因果鏈每環有證據、修法治本、「未查明」時只能
+     要求補證據。回 `CHECK: NG` 就附理由續接 planner 重寫;回 `CHECK: OK`
+     才刪除 `error.md`
    - 續接 implementer,附上處理方式,請它繼續
 
 8. 若實作端產出新版本的 `implement.md`(version 比上次看到的大):
@@ -217,10 +235,10 @@ agent 的回覆**——每次收到 task 完成通知、使用者說「繼續」
      寫 `review.md`
    - review.md 寫好後(不論 planner 是誰寫的——主 session 自己當
      planner 時也一樣),**先呼叫 `review-checker` subagent**(唯讀,
-     sonnet):給它 task 路徑與所有 gate log 位置,讓它對照 WORKFLOW.md
+     fable):給它 task 路徑與所有 gate log 位置,讓它對照 WORKFLOW.md
      的檢查清單核對 review.md 每條證據是否成立、gate log 裡有沒有
-     `[FAIL]`、implement.md 有沒有「偶發 / flake / 重跑就綠 / 不是本次
-     造成」這類字樣卻沒列進「gate 紅過的 step」。它回 `CHECK: NG` 就把
+     `[FAIL]`(含開發期與 validate-case 的 log)、每筆紅有沒有「修前重現
+     N/N / 每環量測 / 修後 N/N」四欄、修法是不是在重現之前就做了。它回 `CHECK: NG` 就把
      review.md 的 STATUS 改成 `CHANGES_REQUESTED` 並附上它的理由;
      它回 `CHECK: OK` 才採信 review.md 的 STATUS。
    - 你只看 review.md 的 `STATUS` 字串:
@@ -304,6 +322,7 @@ code」「N 輪都跑完」),不是「處理完」這種無法檢查的說法。
 | 2 | 委派長工作(gate 鏈、e2e、多輪產出) | **同一回合**掛好 process 監看 + 里程碑監看。監看是狀態:長工作存在期間監看必須存在,輪與輪之間不得空窗。 |
 | 3 | 任何人工查狀態發現長工作在飛 | 該次查詢以「掛上/確認監看」收尾,不得只回答就回到被動等待。 |
 | 4 | 改動觸及契約層(proto/wire/欄位語意/DB schema)或 branch/commit/PR | 先呈使用者裁定,裁定前不動手。 |
+| 4a | planner 產出 plan.md / error_resolution.md | plan-checker OK 才呈使用者或刪 error.md;NG 附理由退回 planner。 |
 | 5 | 準備 commit/PR | review(對齊最終 implement 版本)→ review-checker OK → 所有 gate 於**最終樹**綠,三者齊才出 committer。 |
 
 ## 給使用者的回報

@@ -27,6 +27,8 @@ prompt 裡。prompt 明確寫了「使用者已核准 <操作>」就直接執行
      implement.md 的「變更摘要」與「檔案異動清單」整理:第一行簡短
      摘要,空一行後依序寫改動內容、動機、影響範圍、測試結果。
    - PR description 摘要這次改動的內容與目的。
+   - `Co-Authored-By` trailer 的模型名一律用**委派者(主 session)當下的模型**,
+     由委派 prompt 指定;不得換成 committer 自己執行時的模型名。
 
 3. `git add` implement.md 檔案異動清單裡的檔案(不要 `git add -A`
    把無關檔案掃進來)、`git commit`。

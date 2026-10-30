@@ -41,17 +41,18 @@ gates、注意事項),再讀呼叫者指定的 `.claude/cowork/artifacts/task-<i
    - 結果一律以測試框架自己的總結行(tally/RESULT 行)為準,exit
      code 不可信;找不到總結行=未完成或異常,不是通過。
 
-3. 測試失敗時,先自我診斷再決定下一步:
-
-   ```
-   git stash
-   <重跑失敗的那個 gate>
-   git stash pop
-   ```
-
-   - 基準(stash 後)也失敗 → 不是你造成的,寫
-     `.claude/cowork/artifacts/task-<id>/error.md`(格式見 WORKFLOW.md),結束這一輪。
-   - 基準通過、只有你的改動後失敗 → 是你造成的,直接修正後重跑。
+3. 任何一次執行紅了(gate、開發期試跑、validate-case 都算;故意 sabotage
+   除外),**順序鎖死,不得先改 code 或 test 再看會不會綠**:
+   1. 保全現場:log、metrics 快照、抓包、node log 複製到
+      `artifacts/task-<id>/logs/`,再動任何東西。
+   2. 同一手法重現至少 3 次,記 N/N;紅綠都要記。
+   3. 每一環因果都要有量測(計數器差值、抓包行、log 檔案:行號)。
+      可用 stash 基準(`git stash push -u -m <tag>` → 重跑 → `git stash apply <sha>`
+      → drop)判斷是不是本次改動造成,這只是其中一筆證據,不是結論。
+   4. 把 1–3 寫進 implement.md「紅過的 step」或 `error.md`(格式見 WORKFLOW.md),
+      結束這一輪等 planner;planner 看過證據指示修法後才改。
+   5. 修完用同一手法再跑 N/N,一起寫進「紅過的 step」。
+   做不到 2 或 3 就寫「未查明」+ 下一步要抓什麼證據,一樣交回 planner。
 
 4. gates 全部通過後,寫 `.claude/cowork/artifacts/task-<id>/implement.md`(格式見
    WORKFLOW.md)。「測試結果」必須逐項涵蓋 gates 清單。若 cowork.md
