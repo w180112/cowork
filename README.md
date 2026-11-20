@@ -88,7 +88,9 @@ init 生成的檔案都集中在 `.claude/cowork/`:
    - planner 寫好 `plan.md` → 主 session 給你看設計摘要,**問你
      是否進入實作**(每個任務都問,`auto` 也不跳過)
    - 委派 implementer 實作 + 跑 gates
-   - planner review(依 WORKFLOW.md 檢查清單),有問題退回修正,
+   - 獨立的 reviewer 只看 plan 與實際 diff 審一次(不看 planner 的
+     review),planner review(依 WORKFLOW.md 檢查清單)逐條處置它的
+     發現,有問題退回修正,
      直到 `STATUS: PASS`
    - `approval: ask` 時列 commit message / PR 標題等你核准 →
      committer 執行 commit / push / PR

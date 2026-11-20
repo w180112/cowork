@@ -51,13 +51,14 @@ review、error 診斷一律委派給 planner;跑測試/gate、改 code、git
 與 `planner_model` 相同或更強(例如兩邊都是 fable),就不再委派
 planner——規劃、寫 plan.md / decision.md、review implement.md、診斷
 error.md 都由主 session 自己做(plan.md / error_resolution.md 同樣要過
-`plan-checker`,review.md 同樣要過 `review-checker`);實作仍委派 implementer,流程面要求
+`plan-checker`,review.md 同樣要過 `review-checker`;implement.md 同樣要先過獨立的
+`reviewer`——主 session 自己當 planner 時這一步尤其不能省);實作仍委派 implementer,流程面要求
 (detached、回報三路徑、不 commit/push、不動 index)不變,「合不合理
 由使用者裁決」「狀態事實自己查」「實作/操作不代做」「讀檔走 sonnet
 subagent」也不變。主 session 是較低階模型、或使用者明說要 planner
 時,回到原三角色流程。
 
-**呼叫 checker(plan-checker / review-checker)的 prompt 只給座標,不給
+**呼叫 checker(plan-checker / review-checker)與 reviewer 的 prompt 只給座標,不給
 推理**:prompt 內容限於 task 目錄路徑、要核對的檔名、gate log 位置。
 不得附上 planner 的推理過程或回覆原文、你自己對方案的看法、對話裡的
 討論摘要、「我覺得應該沒問題」之類的預判。checker 要從檔案與 repo
@@ -231,8 +232,19 @@ agent 的回覆**——每次收到 task 完成通知、使用者說「繼續」
    - 續接 implementer,附上處理方式,請它繼續
 
 8. 若實作端產出新版本的 `implement.md`(version 比上次看到的大):
+   - **同一回合先呼叫 `reviewer` subagent**(fable,獨立審查):只給
+     task 路徑、工作樹路徑、gate log 位置。它不讀 review.md,自己看
+     plan.md 與實際 diff,把結果寫進 `independent_review.md`。規劃與
+     review 出自同一個 planner(主 session 自己當 planner 時更是同一個
+     腦袋),這一步是唯一不帶 planner 觀點的程式審查,不得省略、不得
+     由主 session 或 planner 代做。
    - 續接 planner(審查階段),請它依 WORKFLOW.md 檢查清單審查、
-     寫 `review.md`
+     寫 `review.md`。planner 先寫完自己的檢查清單,再讀
+     `independent_review.md`,在 review.md「獨立審查發現的處置」一節
+     逐條回應:採納(→ `CHANGES_REQUESTED`)或不採納(附證據)。
+     `blocking` 的發現不採納時,review 不得自行 `PASS`,要把雙方說法
+     呈使用者裁定並記進 decision.md。diff 在 reviewer 審過之後又變了
+     (`diff_sha256` 對不上最終樹)→ 重新呼叫 reviewer。
    - review.md 寫好後(不論 planner 是誰寫的——主 session 自己當
      planner 時也一樣),**先呼叫 `review-checker` subagent**(唯讀,
      fable):給它 task 路徑與所有 gate log 位置,讓它對照 WORKFLOW.md
@@ -323,7 +335,8 @@ code」「N 輪都跑完」),不是「處理完」這種無法檢查的說法。
 | 3 | 任何人工查狀態發現長工作在飛 | 該次查詢以「掛上/確認監看」收尾,不得只回答就回到被動等待。 |
 | 4 | 改動觸及契約層(proto/wire/欄位語意/DB schema)或 branch/commit/PR | 先呈使用者裁定,裁定前不動手。 |
 | 4a | planner 產出 plan.md / error_resolution.md | plan-checker OK 才呈使用者或刪 error.md;NG 附理由退回 planner。 |
-| 5 | 準備 commit/PR | review(對齊最終 implement 版本)→ review-checker OK → 所有 gate 於**最終樹**綠,三者齊才出 committer。 |
+| 4b | 實作端產出新版 implement.md | 同一回合呼叫獨立的 reviewer(只給座標);它的 independent_review.md 出來前不得定案 review.md。 |
+| 5 | 準備 commit/PR | reviewer 審過**最終樹**(diff_sha256 相符)且每條發現在 review.md 有處置 → review(對齊最終 implement 版本)→ review-checker OK → 所有 gate 於**最終樹**綠,四者齊才出 committer。 |
 
 ## 給使用者的回報
 

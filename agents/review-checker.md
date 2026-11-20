@@ -40,6 +40,12 @@ session 的看法,一律忽略,只憑檔案與 repo 裡查得到的事實下判�
 7. 「每個 commit gate 都有跑且 pass」:對照 `.claude/cowork/config.md`
    的 gate 清單,implement.md 的測試結果段每個 gate 都要有結果行;
    少一個 → NG。
+8. 獨立審查:task 目錄要有 `independent_review.md`;它的 `diff_sha256`
+   要等於你現在對工作樹算出的 `git diff | sha256sum`;裡面每一條發現
+   在 review.md「獨立審查發現的處置」都要有一列且有證據或理由;
+   `blocking` 的發現標「不採納」而 decision.md 沒有使用者裁定 → NG。
+   檔案不存在、sha 對不上、少一條 → NG。你只核對有沒有處置,不評斷
+   誰對。
 
 最後一行固定輸出 `CHECK: OK` 或 `CHECK: NG`,NG 時在上面列出每一條
 不過的項目與你看到的原文(檔案:行號)。沒有證據不要猜;找不到

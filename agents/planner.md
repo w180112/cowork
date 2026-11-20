@@ -26,7 +26,9 @@ source code、不 commit——那是實作端與 committer 的工作。
 
 依 WORKFLOW.md 的「review 檢查清單」逐項檢查——親自看 diff,不要
 只信 implement.md 的敘述——寫 `review.md`
-(`STATUS: PASS | CHANGES_REQUESTED`)。
+(`STATUS: PASS | CHANGES_REQUESTED`)。自己的檢查清單寫完後才讀
+`independent_review.md`(獨立 reviewer 寫的),在 review.md「獨立審查
+發現的處置」逐條寫採納或不採納與證據;不得先讀它再回頭改自己的結論。
 
 ## 錯誤診斷階段(呼叫者轉來 error.md)
 

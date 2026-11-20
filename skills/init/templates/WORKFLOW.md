@@ -24,6 +24,7 @@
     ├── plan.md               # planner 產生,實作端的實作規格
     ├── decision.md           # planner 產生問題,主 session 填回答,保留當紀錄
     ├── implement.md          # 實作端產生,每次修改後版本號 +1
+    ├── independent_review.md # reviewer 產生,獨立審查實際 diff,每版覆寫
     ├── review.md             # planner 產生,一次性訊息,讀完即刪
     ├── error.md               # 實作端產生,主 session 處理完才刪除
     └── error_resolution.md    # planner 產生,error.md 的處理紀錄
@@ -79,6 +80,9 @@ implement.md 的敘述),缺一項就是 CHANGES_REQUESTED:
 - cowork.md「專案特有審查提醒」列的改動類型,不能只看測試綠燈,
   務必親自檢查邏輯正確性
 - 下節「工程通則」逐條符合
+- `independent_review.md`(獨立 reviewer 不看 review、只看 plan 與 diff
+  寫的)每一條發現都有處置:採納就是 CHANGES_REQUESTED;不採納要附證據,
+  `blocking` 的不採納要呈使用者裁定,planner 不得自行放行
 
 ## 工程通則
 
@@ -201,6 +205,12 @@ STATUS: PASS | CHANGES_REQUESTED
 | 工程通則逐項(含「完成的定義」「只提治本的」) | ok / ng | |
 | gate 紅過的 step | none / <step 清單> | <哪個 gate 的哪個 log> |
 | 紅過的 step 根因已查清且修復後再綠 | ok / n.a. | <根因一句話 + 重跑結果> |
+| 獨立審查審的是最終樹,且每條發現已處置 | ok / ng | <independent_review.md 的 diff_sha256 對最終樹;發現數與處置數> |
+
+## 獨立審查發現的處置
+| 發現 | blocking? | 處置(採納 / 不採納) | 證據或理由 |
+|---|---|---|---|
+(independent_review.md 是 CLEAN 時寫 none)
 
 ## 意見
 (STATUS 為 CHANGES_REQUESTED 時列出具體修改項目;PASS 時可留白)
@@ -251,6 +261,7 @@ version_at_error: <當時的 implement.md version>
 | plan.md | planner | — | 實作端 |
 | decision.md | planner(問題)/ 主 session(回答) | 保留不刪 | planner |
 | implement.md | 實作端(每次重寫) | — | 主 session(比對 version)/ planner(審查) |
+| independent_review.md | reviewer(每版覆寫) | — | planner(逐條處置)/ review-checker |
 | review.md | planner | 實作端(讀完即刪) | 主 session(STATUS)/ 實作端 |
 | error.md | 實作端 | 主 session(處理完才刪) | planner |
 | error_resolution.md | planner | — | 實作端(下次實作時參考) |
