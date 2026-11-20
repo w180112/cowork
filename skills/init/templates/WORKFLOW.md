@@ -138,7 +138,7 @@ implement.md 的敘述),缺一項就是 CHANGES_REQUESTED:
   既有缺陷、與本任務的改動無關** —— 「不是我弄壞的」不是放行的理由,
   紅的 gate 就是紅的
 - 調查中挖到而併進本任務的問題,**要修完**才算完成;登記起來不等於處理過
-- **所有 gate(unit test 與 e2e)只能在該 task 要做的事全部做完之後才跑**;跨 repo 的 task 要兩邊都做完、controller 已部署到 bench,implementer 才能開始跑 gate。半成品不跑 gate。
+- **所有 gate(unit test 與 e2e)只能在該 task 要做的事全部做完之後才跑**;跨 repo 的 task 要每個 repo 都做完、相依的服務已部署到測試環境,implementer 才能開始跑 gate。半成品不跑 gate。
 - 帶著已知的紅去 commit,等於把「這裡壞掉」寫進歷史,下一個人會以為
   那是可接受的狀態
 
@@ -211,7 +211,7 @@ STATUS: PASS | CHANGES_REQUESTED
 | 文件白話 | ok / ng | |
 | 專案特有審查提醒逐項 | ok / ng / n.a. | <哪幾項、怎麼查> |
 | 工程通則逐項(含「完成的定義」「只提治本的」) | ok / ng | |
-| 紅過的 step(gate、開發期、validate-case 任一次執行) | none / <step 清單> | <哪次執行的哪個 log 哪一行> |
+| 紅過的 step(gate、開發期試跑、驗證用的執行,任一次) | none / <step 清單> | <哪次執行的哪個 log 哪一行> |
 | 紅過的 step 四欄齊全(修前重現 N/N、每環量測、修後 N/N、或「未查明」) | ok / ng / n.a. | <implement.md 哪一節;四欄各自的數字> |
 | 獨立審查審的是最終樹,且每條發現已處置 | ok / ng | <independent_review.md 的 diff_sha256 對最終樹;發現數與處置數> |
 
@@ -225,8 +225,8 @@ STATUS: PASS | CHANGES_REQUESTED
 ```
 
 `紅過的 step` 的定義:**本任務期間任何一次執行**出現過的 FAIL——gate、
-開發期試跑、`--validate-case`、單 phase 都算,不只 gate;故意 sabotage /
-drill 預期的紅除外。不論後來重跑有沒有綠、不論 stash 基準是否也紅、
+開發期試跑、驗證測試本身的執行、只跑一部分的執行都算,不只 gate;故意
+sabotage / 故障注入預期的紅除外。不論後來重跑有沒有綠、不論 stash 基準是否也紅、
 不論是不是本次改動造成。「既有 flake」「重跑就綠」「不是我弄壞的」都不是
 填 `none` 的理由;有紅過就併進本任務查到根因、修到綠,才能 PASS
 (見工程通則「完成的定義」)。

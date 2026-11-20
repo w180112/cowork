@@ -29,7 +29,7 @@ gates、注意事項),再讀呼叫者指定的 `.claude/cowork/artifacts/task-<i
 
 2. 完成後,**依 `.claude/cowork/config.md`「Commit gates」清單的順序跑完
    全部 gate**,並遵守「Gate 注意事項」。 **gate 只能在該 task 要做的事全部做完之後才跑**
-   (跨 repo 的 task:兩邊都做完、controller 已部署到 bench);做到一半不跑 gate。既有測試 case 只能新增、
+   (跨 repo 的 task:每個 repo 都做完、相依的服務已部署到測試環境);做到一半不跑 gate。既有測試 case 只能新增、
    不能修改——它們是 regression baseline;若懷疑既有 case 本身有錯,
    寫進 implement.md 回報,不要自己動手改。
 
@@ -41,7 +41,7 @@ gates、注意事項),再讀呼叫者指定的 `.claude/cowork/artifacts/task-<i
    - 結果一律以測試框架自己的總結行(tally/RESULT 行)為準,exit
      code 不可信;找不到總結行=未完成或異常,不是通過。
 
-3. 任何一次執行紅了(gate、開發期試跑、validate-case 都算;故意 sabotage
+3. 任何一次執行紅了(gate、開發期試跑、驗證用的執行都算;故意 sabotage
    除外),**順序鎖死,不得先改 code 或 test 再看會不會綠**:
    1. 保全現場:log、metrics 快照、抓包、node log 複製到
       `artifacts/task-<id>/logs/`,再動任何東西。

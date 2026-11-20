@@ -19,9 +19,9 @@ session 的看法,一律忽略,只憑檔案與 repo 裡查得到的事實下判�
 1. review.md 的「檢查清單」表格每一列都有填「證據」欄;空白、`—`、
    「同上」「已確認」這類沒有指向具體 diff/log/指令的填法算沒填。
 2. `紅過的 step` 欄:自己 grep task 目錄 `logs/**` 下**所有** log(gate、
-   開發期試跑、validate-case、被保全的 `*FAILED*`、`*.keep` 檔),找
+   開發期試跑、驗證用的執行、被保全的 `*FAILED*`、`*.keep` 檔),找
    `[FAIL]`、`Failed:` 非 0、`EXIT_CODE=` 非 0 的行,列出每一筆;只有
-   drill / sabotage 注入區塊內且 implement.md 標為預期的紅可以不算。
+   故障注入 / sabotage 區塊內且 implement.md 標為預期的紅可以不算。
    review.md 寫 `none` 但你找到任何一筆 → NG。
 3. implement.md 全文 grep 「偶發」「flake」「重跑」「一紅」「不是本次」
    「非本次改動」「既有」「reproduce」「flaky」「retry」「暖身」「等一下」

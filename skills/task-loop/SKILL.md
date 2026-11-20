@@ -253,7 +253,7 @@ agent 的回覆**——每次收到 task 完成通知、使用者說「繼續」
      planner 時也一樣),**先呼叫 `review-checker` subagent**(唯讀,
      fable):給它 task 路徑與所有 gate log 位置,讓它對照 WORKFLOW.md
      的檢查清單核對 review.md 每條證據是否成立、gate log 裡有沒有
-     `[FAIL]`(含開發期與 validate-case 的 log)、每筆紅有沒有「修前重現
+     `[FAIL]`(含開發期與驗證用執行的 log)、每筆紅有沒有「修前重現
      N/N / 每環量測 / 修後 N/N」四欄、修法是不是在重現之前就做了。它回 `CHECK: NG` 就把
      review.md 的 STATUS 改成 `CHANGES_REQUESTED` 並附上它的理由;
      它回 `CHECK: OK` 才採信 review.md 的 STATUS。
@@ -344,7 +344,7 @@ code」「N 輪都跑完」),不是「處理完」這種無法檢查的說法。
 
 ## 給使用者的回報
 
-- **動手前先對照使用者的原話**:每個動作(尤其 git、bench、刪除、發布)先用一句話寫下
+- **動手前先對照使用者的原話**:每個動作(尤其 git、共用測試環境、刪除、發布)先用一句話寫下
   「使用者要我做的是 X」,X 只能來自使用者的字面指示,不加自己的延伸;字面沒涵蓋的
   部分(例如「刪 repo 上的 branch」不含本機、「還原 branch」不含還原 commit)就是不做,
   有疑義先問再動。做完只回報 X 的結果。

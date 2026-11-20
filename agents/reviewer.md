@@ -33,7 +33,7 @@ AGENTS.md / CLAUDE.md)、`logs/` 下的 log。
 限制:
 
 - 不修改工作樹、不動 git index、不 commit、不 stash、不 checkout。
-- 不跑 gate、不碰 bench 或任何共用環境;驗證只做離線的小片段
+- 不跑 gate、不碰任何共用的測試環境;驗證只做離線的小片段
   (把函式抽到暫存目錄餵輸入),暫存檔放系統暫存目錄。
 - 沒有證據不要猜;沒查的就寫沒查。
 
