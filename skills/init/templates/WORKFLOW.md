@@ -1,6 +1,6 @@
 # Task-loop 協定規格
 
-<!-- cowork-kit-version: 6(由 /cowork:init 生成,升級協定請重跑 init)-->
+<!-- cowork-kit-version: 7(由 /cowork:init 生成,升級協定請重跑 init)-->
 
 本文件是 task-loop 三個角色之間交接的唯一事實來源。實際的檔案格式、
 狀態欄位、版本規則以本文件為準。
@@ -72,6 +72,7 @@ implement.md 的敘述),缺一項就是 CHANGES_REQUESTED:
 
 - audit「變更摘要」是否真的符合「檔案異動清單」與實際 diff
 - cowork.md「Commit gates」清單裡的每一個 gate 都有涵蓋且 pass
+- 新增 unit test:同主題的測試條件併入同一個(優先為既有)test function,不得逐條件開新函式;函式名照 test_<被測函式>(一個被測函式對應一個 test function,情境全放函式內斷言),名字必須指向實際存在的函式
 - 沒有修改既有測試 case(只能新增——既有 case 是 regression
   baseline;懷疑既有 case 有錯應該在 implement.md 回報,不是改掉)
 - comment 品質:改到的程式碼周邊 comment 有跟著更新;comment 只
@@ -79,6 +80,7 @@ implement.md 的敘述),缺一項就是 CHANGES_REQUESTED:
 - 文件類產出(implement.md、README 等)白話易讀
 - cowork.md「專案特有審查提醒」列的改動類型,不能只看測試綠燈,
   務必親自檢查邏輯正確性
+
 - 下節「工程通則」逐條符合
 - `independent_review.md`(獨立 reviewer 不看 review、只看 plan 與 diff
   寫的)每一條發現都有處置:採納就是 CHANGES_REQUESTED;不採納要附證據,
@@ -136,6 +138,7 @@ implement.md 的敘述),缺一項就是 CHANGES_REQUESTED:
   既有缺陷、與本任務的改動無關** —— 「不是我弄壞的」不是放行的理由,
   紅的 gate 就是紅的
 - 調查中挖到而併進本任務的問題,**要修完**才算完成;登記起來不等於處理過
+- **所有 gate(unit test 與 e2e)只能在該 task 要做的事全部做完之後才跑**;跨 repo 的 task 要兩邊都做完、controller 已部署到 bench,implementer 才能開始跑 gate。半成品不跑 gate。
 - 帶著已知的紅去 commit,等於把「這裡壞掉」寫進歷史,下一個人會以為
   那是可接受的狀態
 
@@ -161,6 +164,10 @@ timestamp: <ISO 8601>
 ## 測試結果
 (.claude/cowork/config.md「Commit gates」清單裡的每一個 gate 各一行:
  pass/fail、指令與輸出摘要,缺一個 gate 就不算完成)
+
+## 紅過的 step
+(none,或每筆紅一段:哪次執行、哪個 step、log 路徑;四欄——修改前重現
+ N/N 與手法、每環量測、修改後 N/N、或「未查明」+ 下一步證據。定義見 review.md 一節)
 ```
 
 `version` 欄位是主 session 判斷「有沒有新內容需要送審」的依據。
@@ -186,7 +193,7 @@ sandbox 裡(如 codex 的 workspace-write)而 gate 需要 sandbox 外的
 
 planner 撰寫。**檢查清單是必填表格,不是提醒**:每一條都要有「證據」
 欄(看了哪個 diff 區段、哪個 log 的哪一行、跑了什麼指令),空著就
-不是合法的 review;`gate 紅過的 step` 不是 `none` 時不得寫 `PASS`。
+不是合法的 review;`紅過的 step` 不是 `none` 而四欄沒齊時不得寫 `PASS`。
 
 ```markdown
 # review.md
@@ -197,14 +204,15 @@ STATUS: PASS | CHANGES_REQUESTED
 | 項目 | 結果 | 證據 |
 |---|---|---|
 | 變更摘要 = 檔案異動清單 = 實際 diff | ok / ng | <diff 區段 / 指令> |
-| 每個 commit gate 都有跑且 pass | ok / ng | <各 gate 的結果行> |
+| 每個 commit gate 都有跑且 pass(在 task 全部做完之後跑) | ok / ng | <各 gate 的結果行> |
 | 既有測試 case 未修改 | ok / ng | <diff 中測試檔的變動性質> |
+| 新增 test 函式無同主題拆分、命名指向實際函式 | ok / ng | <新增 test 函式名清單與歸屬/命名判定> |
 | comment 更新且只描述最終行為 | ok / ng | <看過的區段> |
 | 文件白話 | ok / ng | |
 | 專案特有審查提醒逐項 | ok / ng / n.a. | <哪幾項、怎麼查> |
 | 工程通則逐項(含「完成的定義」「只提治本的」) | ok / ng | |
-| gate 紅過的 step | none / <step 清單> | <哪個 gate 的哪個 log> |
-| 紅過的 step 根因已查清且修復後再綠 | ok / n.a. | <根因一句話 + 重跑結果> |
+| 紅過的 step(gate、開發期、validate-case 任一次執行) | none / <step 清單> | <哪次執行的哪個 log 哪一行> |
+| 紅過的 step 四欄齊全(修前重現 N/N、每環量測、修後 N/N、或「未查明」) | ok / ng / n.a. | <implement.md 哪一節;四欄各自的數字> |
 | 獨立審查審的是最終樹,且每條發現已處置 | ok / ng | <independent_review.md 的 diff_sha256 對最終樹;發現數與處置數> |
 
 ## 獨立審查發現的處置
@@ -216,10 +224,32 @@ STATUS: PASS | CHANGES_REQUESTED
 (STATUS 為 CHANGES_REQUESTED 時列出具體修改項目;PASS 時可留白)
 ```
 
-`gate 紅過的 step` 的定義:**本任務任何一次 gate 執行**出現過的 FAIL,
-不論後來重跑有沒有綠、不論 stash 基準是否也紅、不論是不是本次改動
-造成。「既有 flake」「重跑就綠」「不是我弄壞的」都不是填 `none` 的理由;
-有紅過就併進本任務查到根因、修到綠,才能 PASS(見工程通則「完成的定義」)。
+`紅過的 step` 的定義:**本任務期間任何一次執行**出現過的 FAIL——gate、
+開發期試跑、`--validate-case`、單 phase 都算,不只 gate;故意 sabotage /
+drill 預期的紅除外。不論後來重跑有沒有綠、不論 stash 基準是否也紅、
+不論是不是本次改動造成。「既有 flake」「重跑就綠」「不是我弄壞的」都不是
+填 `none` 的理由;有紅過就併進本任務查到根因、修到綠,才能 PASS
+(見工程通則「完成的定義」)。
+
+每一筆紅,implement.md「紅過的 step」一節必填四欄,缺一欄 review 不得 PASS:
+1. **修改前穩定重現**:手法 + 次數(N/N,N ≥ 3;使用者另裁者註明 decision.md 條目)。
+2. **因果鏈每一環對應的量測**:計數器差值、抓包行、log 行(檔案:行號)。
+   「機制成立 + 症狀吻合」是相容性論證,不算量測。
+3. **修改後同一手法 N/N 綠**。
+4. 任一欄做不到 → 寫「**未查明**」+ 下一步要抓什麼證據。「未查明」時 review
+   只能 `CHANGES_REQUESTED`,除非 decision.md 有使用者明文放行。
+
+向使用者提「放行未查明」之前,planner(或自己當 planner 的主 session)必須先做完:
+- decision.md 寫一節「未做的量測」,逐項列:量什麼、哪一種結果會否證目前的
+  說法、成本(次數 × 每次時間,附算式)。「原始那次的 log 還原不了」不等於
+  「沒有東西可量」;能設計新實驗驗證或否證說法的,都算未做。
+- 這份清單送 plan-checker 核對;只要有一項可行,就不得提放行,直接排量測。
+- 清單為空(或每一項都寫明為何做不到)且 plan-checker OK,才可以把放行請求
+  連同清單呈使用者。decision.md 出現放行請求或放行條目卻沒有這一節 →
+  review 不得 PASS,review-checker 判 NG。
+
+順序鎖死:遇紅先重現、取證、寫進 implement.md(或 error.md),planner 看過
+證據才派修法。「先改再看會不會綠」算違規,review 直接 NG。
 
 `STATUS` 欄位是唯一的機器可讀判斷依據,雙方都用字串比對
 `STATUS: PASS` 是否存在,不要用語意理解取代這個判斷。review.md 讀完
@@ -253,6 +283,17 @@ version_at_error: <當時的 implement.md version>
 `error_resolution.md` 或更新 `plan.md`**,主 session 才能刪除
 `error.md`——刪除動作本身不承載任何資訊,純粹是「已讀,可以繼續」
 的訊號。
+
+## 主 session / planner 的回報與委派
+
+- 動手前先對照使用者的原話:每個動作先寫下「使用者要我做的是 X」,X 只能來自字面指示,
+  不加延伸(「刪 repo 上的 branch」不含本機、「還原 branch」不含還原 commit);字面沒涵蓋就不做,
+  有疑義先問。
+- 回報只給附證據的事實(路徑/行號/log 名);「為什麼那樣做」沒有可查紀錄就不說,
+  被問時答「沒查就做了」,不重建原因
+- 委派實作端時不描述 gate 怎麼跑(旗標、順序、次數),只寫「依 config.md」;
+  review 對照 config.md 原文核對 gate 是否照規定跑
+- 規範已存在就遵守;不寫新 memory 當補償
 
 ## 角色職責對照
 

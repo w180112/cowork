@@ -1,6 +1,6 @@
 # cowork task-loop 專案設定
 
-<!-- cowork-kit-version: 6 -->
+<!-- cowork-kit-version: 7 -->
 
 task-loop skill 每輪開始時讀取本檔案。修改設定直接改這裡即可,
 不需要重跑 /cowork:init(重跑 init 用於升級協定版本或重新問答)。
@@ -41,5 +41,9 @@ task-loop skill 每輪開始時讀取本檔案。修改設定直接改這裡即�
 {{GATE_NOTES}}
 
 ## 專案特有審查提醒
+
+**向使用者提「放行未查明」之前**:先照 WORKFLOW.md「紅過的 step」第 4 欄下方
+的三條做完(decision.md「未做的量測」清單 → plan-checker 核對 → 無可行項
+才可呈使用者)。
 
 {{REVIEW_NOTES}}

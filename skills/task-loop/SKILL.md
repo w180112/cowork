@@ -205,6 +205,10 @@ agent 的回覆**——每次收到 task 完成通知、使用者說「繼續」
    任務描述與 task 路徑,請它產出 plan.md 或 decision.md。
 
 4. 若 planner 產出 `decision.md`(`STATUS: WAITING`):
+   - **先推通知**:decision.md 一寫成 `WAITING` 就立刻用
+     PushNotification 推一行給使用者(問題 + 選項),不等 review、
+     不等報告寫完。使用者不在終端機前時只有這條管道會到;寫在
+     一般回覆裡的問題不會產生任何通知。
    - 用 AskUserQuestion 把每個未回答的問題轉給使用者,選項與
      planner 的建議照檔案內容呈現
    - 把使用者的決定填進各題「回答」欄,STATUS 改成 `ANSWERED`

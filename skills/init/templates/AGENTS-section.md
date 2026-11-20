@@ -1,4 +1,4 @@
-<!-- cowork-kit-version: 6 — 本段由 /cowork:init 生成,升級協定請重跑 init -->
+<!-- cowork-kit-version: 7 — 本段由 /cowork:init 生成,升級協定請重跑 init -->
 # 實作端職責(task-loop 協定)
 
 本段給外部 CLI 實作端(Codex、OpenCode 等透過 AGENTS.md 載入指令的
